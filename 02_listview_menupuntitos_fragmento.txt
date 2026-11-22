@@ -1,0 +1,522 @@
+================================================================================
+ EXAMEN: LISTVIEW (3 ELEMENTOS) + SEGUNDA ACTIVIDAD CON MENÚ DE PUNTITOS
+         + FRAGMENTO CON BOTÓN "saludito"
+ Proyecto: Listview221025
+================================================================================
+
+NOTAS ANTES DE EMPEZAR
+- Crea el proyecto en Android Studio como "Empty Views Activity" en Java,
+  con el nombre Listview221025 (así sale el título en la barra de arriba).
+- En este archivo el paquete es: com.example.listview221025
+  Si tu proyecto se llama distinto, cambia SOLO la primera línea "package ..."
+  de cada .java por el nombre de tu paquete.
+- IMÁGENES de la lista: copia 3 imágenes de deportes a app/src/main/res/drawable/
+  con los nombres deporte1, deporte2, deporte3 (.png o .jpg, en minúsculas,
+  sin espacios ni guiones).
+- Para crear la actividad "segunda": clic derecho en el paquete >
+  New > Activity > Empty Views Activity (se agrega sola al Manifest).
+- Para crear el fragmento "Saludito": clic derecho en el paquete >
+  New > Fragment > Fragment (Blank). Borra todo lo que trae de ejemplo
+  (ARG_PARAM1, newInstance, onCreate, etc.) y deja solo lo que viene abajo.
+- Para crear el menú: clic derecho en res > New > Android Resource File >
+  Resource type: Menu, nombre: menucito.
+- Para crear la palomita: clic derecho en res/drawable > New > Drawable
+  Resource File, nombre: palomita, y pega el código de abajo.
+  (O New > Vector Asset > clip art "check circle" y nómbralo palomita).
+- Archivos que NO se modifican en ningún paso: build.gradle.kts,
+  settings.gradle.kts, strings.xml, colors.xml, AndroidManifest.xml
+  (el Manifest ya lo deja bien Android Studio al crear "segunda").
+- Ubicación de cada archivo:
+    .java          -> app/src/main/java/com/example/listview221025/
+    layouts .xml   -> app/src/main/res/layout/
+    menucito.xml   -> app/src/main/res/menu/
+    palomita.xml   -> app/src/main/res/drawable/
+    themes.xml     -> app/src/main/res/values/
+
+
+################################################################################
+################################################################################
+ PASO 1: LISTVIEW DE 3 ELEMENTOS (imagen + 2 textview), AL DAR CLIC EN EL
+         PRIMERO TE LLEVA A LA SEGUNDA ACTIVIDAD (3 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS/MODIFICADOS: MainActivity.java, activity_main.xml,
+                      adaptador.java, basurita.xml,
+                      segunda.java, activity_segunda.xml,
+                      themes.xml
+  (menucito.xml, palomita.xml, Saludito.java y fragment_saludito.xml todavía
+   no existen)
+
+--------------------------------------------------------------------------------
+ themes.xml   (res/values/themes.xml)
+ Se borra ".NoActionBar" para que aparezca la barra de arriba con el título
+ y después el menú de puntitos. Cambia "Listview221025" si tu tema se llama
+ distinto.
+--------------------------------------------------------------------------------
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Listview221025" parent="Theme.Material3.DayNight">
+        <!-- todo Borra lo de .NoActionBar-->
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Listview221025" parent="Base.Theme.Listview221025" />
+</resources>
+
+--------------------------------------------------------------------------------
+ MainActivity.java
+--------------------------------------------------------------------------------
+package com.example.listview221025;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    ListView vista;
+    String nombre [] = {"uno", "dos", "tres"};
+    String comentarios [] = {"deportes 1", "deportes 2", "deportes 3"};
+    int imagenes [] = {R.drawable.deporte1, R.drawable.deporte2, R.drawable.deporte3};
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        vista = findViewById(R.id.lista);
+        vista.setOnItemClickListener(this);
+        adaptador adaptador = new adaptador(getApplicationContext(),
+                comentarios, nombre, imagenes);
+        vista.setAdapter(adaptador);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+        //todo position 0 es el primer elemento de la lista
+        if(position == 0){
+            Intent intentito = new Intent(this, segunda.class);
+            startActivity(intentito);
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_main.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/lista"></ListView>
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ adaptador.java   (NUEVO - clic derecho en el paquete > New > Java Class)
+--------------------------------------------------------------------------------
+package com.example.listview221025;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+//todo ponle lo de extends BaseAdapter
+public class adaptador extends BaseAdapter {
+    Context contexto;
+    String comentarios [];
+    String nombre [];
+    int imagenes [];
+    LayoutInflater inflater;
+
+    //todo Constructor
+    public adaptador(Context contexto, String[] comentarios, String[] nombre,
+                     int[] imagenes) {
+        this.contexto = contexto;
+        this.comentarios = comentarios;
+        this.nombre = nombre;
+        this.imagenes = imagenes;
+        this.inflater = LayoutInflater.from(contexto);
+    }
+
+    @Override
+    public int getCount(){
+        return comentarios.length;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return null;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        convertView = inflater.inflate(R.layout.basurita, null);
+        TextView texto1 = convertView.findViewById(R.id.texto1);
+        TextView texto2 = convertView.findViewById(R.id.texto2);
+        ImageView imagen = convertView.findViewById(R.id.fotito);
+        texto1.setText(nombre[position]);
+        texto2.setText(comentarios[position]);
+        imagen.setImageResource(imagenes[position]);
+        return convertView;
+    }
+}
+
+--------------------------------------------------------------------------------
+ basurita.xml   (NUEVO - diseño de cada renglón de la lista;
+                 clic derecho en res/layout > New > Layout Resource File)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/fotito"></ImageView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/texto1"
+            android:textSize="20dp"></TextView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/texto2"
+            android:textSize="20dp"></TextView>
+
+    </LinearLayout>
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ segunda.java   (por ahora solo muestra la pantalla)
+--------------------------------------------------------------------------------
+package com.example.listview221025;
+
+import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class segunda extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_segunda);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_segunda.xml
+ (el FrameLayout "base" es el espacio donde se va a poner el fragmento)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".segunda"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/base"></FrameLayout>
+
+</LinearLayout>
+
+
+################################################################################
+################################################################################
+ PASO 2: SEGUNDA ACTIVIDAD CON IMAGEN (palomita) Y MENÚ DE PUNTITOS CON UNA
+         OPCIÓN ("pasaste"); AL DAR CLIC EN LA OPCIÓN O EN LA PALOMITA SE
+         LLAMA AL FRAGMENTO CON EL BOTÓN "saludito" (4 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS:      menucito.xml, palomita.xml, Saludito.java, fragment_saludito.xml
+  MODIFICADO:  segunda.java
+  SIN CAMBIOS: MainActivity.java, activity_main.xml, adaptador.java,
+               basurita.xml, activity_segunda.xml, themes.xml
+               (quedan igual que en el PASO 1)
+
+--------------------------------------------------------------------------------
+ palomita.xml   (NUEVO - res/drawable/palomita.xml)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM10,17l-5,-5 1.41,-1.41L10,14.17l7.59,-7.59L19,8l-9,9z" />
+</vector>
+
+--------------------------------------------------------------------------------
+ menucito.xml   (NUEVO - res/menu/menucito.xml)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- todo Esto es para la barra de arriba, ocupa una imagen (la palomita) -->
+    <item
+        android:id="@+id/palomita"
+        android:title="pasaste"
+        android:icon="@drawable/palomita"
+        app:showAsAction="always"></item>
+
+    <!-- todo Esto es para el kebab (los 3 puntitos) -->
+    <item
+        android:id="@+id/pasaste"
+        android:title="pasaste"
+        app:showAsAction="never"></item>
+
+</menu>
+
+--------------------------------------------------------------------------------
+ Saludito.java   (NUEVO - fragmento; por ahora solo muestra el botón)
+--------------------------------------------------------------------------------
+package com.example.listview221025;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+import androidx.fragment.app.Fragment;
+
+public class Saludito extends Fragment {
+
+    View vista;
+    Button boton;
+    //Tienes que borrar todo  lo que aparece arriba hasta aqui
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        vista = inflater.inflate(R.layout.fragment_saludito, container, false);
+        boton = vista.findViewById(R.id.saludito);
+        return vista;
+    }
+}
+
+--------------------------------------------------------------------------------
+ fragment_saludito.xml   (NUEVO - se crea solo junto con el fragmento;
+                          reemplaza su contenido por este)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Saludito"
+    android:orientation="vertical">
+
+    <!-- todo Es un fragment blank view -->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/saludito"
+        android:text="saludito"
+        android:layout_margin="20dp"></Button>
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ segunda.java   (MODIFICADO - completo)
+--------------------------------------------------------------------------------
+package com.example.listview221025;
+
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+public class segunda extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_segunda);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menucito, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        if(item.getItemId() == R.id.palomita || item.getItemId() == R.id.pasaste){
+            //id de la palomita de arriba || id del kebab
+            Saludito fragmentito = new Saludito();
+            reemplazar(fragmentito);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void reemplazar(Fragment fragment){
+        FragmentManager manejador = getSupportFragmentManager();
+        FragmentTransaction transaccion = manejador.beginTransaction();
+        transaccion.replace(R.id.base, fragment);
+        transaccion.commit();
+    }
+}
+
+
+################################################################################
+################################################################################
+ PASO 3: EL BOTÓN DEL FRAGMENTO DESPLIEGA ABAJO EL MENSAJE "hola" (3 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  MODIFICADO:  Saludito.java
+  SIN CAMBIOS: MainActivity.java, activity_main.xml, adaptador.java,
+               basurita.xml, segunda.java, activity_segunda.xml, themes.xml,
+               menucito.xml, palomita.xml, fragment_saludito.xml
+               (quedan igual que en los pasos anteriores)
+
+Qué cambia: el fragmento ahora implementa View.OnClickListener, se le pone
+setOnClickListener al botón y en onClick se muestra un Toast con "hola"
+(el Toast es el mensaje que sale en la parte inferior). En un fragmento se usa
+getContext() en lugar de "this".
+
+--------------------------------------------------------------------------------
+ Saludito.java   (MODIFICADO - completo, versión final)
+--------------------------------------------------------------------------------
+package com.example.listview221025;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
+
+public class Saludito extends Fragment implements View.OnClickListener {
+
+    View vista;
+    Button boton;
+    //Tienes que borrar todo  lo que aparece arriba hasta aqui
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        vista = inflater.inflate(R.layout.fragment_saludito, container, false);
+        boton = vista.findViewById(R.id.saludito);
+        boton.setOnClickListener(this);
+        return vista;
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("saludito")){
+            Toast.makeText(getContext(), "hola", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
+
+
+================================================================================
+ RESUMEN DE ARCHIVOS AL FINAL
+================================================================================
+ themes.xml              -> PASO 1 (no cambia después)
+ MainActivity.java       -> PASO 1 (no cambia después)
+ activity_main.xml       -> PASO 1 (no cambia después)
+ adaptador.java          -> PASO 1 (no cambia después)
+ basurita.xml            -> PASO 1 (no cambia después)
+ segunda.java            -> PASO 1, versión final en PASO 2
+ activity_segunda.xml    -> PASO 1 (no cambia después)
+ palomita.xml            -> PASO 2 (no cambia después)
+ menucito.xml            -> PASO 2 (no cambia después)
+ fragment_saludito.xml   -> PASO 2 (no cambia después)
+ Saludito.java           -> PASO 2, versión final en PASO 3
+ imágenes deporte1/2/3   -> las pones tú en res/drawable
+
+ OJO: si no ves la barra de arriba ni los 3 puntitos, revisa que en
+ themes.xml hayas borrado ".NoActionBar".
+================================================================================
