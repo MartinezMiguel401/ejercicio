@@ -1,0 +1,567 @@
+================================================================================
+ EXAMEN: DOS ACTIVIDADES + ARRAYLIST (datitos / Adatitos) + SPINNER + BOTÓN
+================================================================================
+
+NOTAS ANTES DE EMPEZAR
+- Crea el proyecto en Android Studio como "Empty Views Activity" en Java.
+- En este archivo el paquete es: com.example.examen
+  Si tu proyecto se llama distinto, cambia SOLO la primera línea "package ..."
+  de cada .java por el nombre de tu paquete.
+- Para crear actividad1 y actividad2: clic derecho en el paquete >
+  New > Activity > Empty Views Activity. Android Studio crea el .java, el .xml
+  y las agrega al AndroidManifest solo. Aun así abajo va el Manifest completo
+  para que lo compares.
+- Para crear datitos y Adatitos: clic derecho en el paquete > New > Java Class.
+- Los archivos build.gradle.kts, settings.gradle.kts, strings.xml, themes.xml,
+  colors.xml NO se modifican en ningún paso.
+- Ubicación de cada archivo:
+    .java  -> app/src/main/java/com/example/examen/
+    .xml   -> app/src/main/res/layout/
+    AndroidManifest.xml -> app/src/main/
+
+
+################################################################################
+################################################################################
+ PASO 1: DESPLEGADOS DE LAS DOS ACTIVIDADES (2 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS/MODIFICADOS: MainActivity.java, activity_main.xml,
+                      actividad1.java, activity_actividad1.xml,
+                      actividad2.java, activity_actividad2.xml,
+                      AndroidManifest.xml
+  (datitos.java y Adatitos.java todavía no existen)
+
+--------------------------------------------------------------------------------
+ MainActivity.java
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    Button actividad1b, actividad2b;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        actividad1b = findViewById(R.id.actividad1);
+        actividad1b.setOnClickListener(this);
+
+        actividad2b = findViewById(R.id.actividad2);
+        actividad2b.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("actividad1")){
+            Intent intentito = new Intent(this, actividad1.class);
+            startActivity(intentito);
+        }else if(cadenita.equals("actividad2")){
+            Intent intentito = new Intent(this, actividad2.class);
+            startActivity(intentito);
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_main.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/actividad1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="actividad1" />
+
+    <Button
+        android:id="@+id/actividad2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="actividad2" />
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ actividad1.java   (por ahora solo muestra la pantalla)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class actividad1 extends AppCompatActivity {
+
+    EditText dato1, dato2;
+    Spinner combito;
+    Button botoncito;
+    String [] opciones = {"selecciona opcion", "carrito", "desplegar"};
+    ArrayAdapter adaptado;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_actividad1);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        dato1 = findViewById(R.id.texto1);
+        dato2 = findViewById(R.id.texto2);
+        botoncito = findViewById(R.id.despliega);
+
+        adaptado = new ArrayAdapter(this, android.R.layout.simple_list_item_1, opciones);
+        combito = findViewById(R.id.combito);
+        combito.setAdapter(adaptado);
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_actividad1.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".actividad1">
+
+    <EditText
+        android:id="@+id/texto1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="clave" />
+
+    <EditText
+        android:id="@+id/texto2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="nombre" />
+
+    <Spinner
+        android:id="@+id/combito"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/despliega"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="desplegar" />
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ actividad2.java
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class actividad2 extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_actividad2);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_actividad2.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".actividad2">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="actividad2" />
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ AndroidManifest.xml
+ (Solo importan las 3 etiquetas <activity>. El resto déjalo como te lo generó
+  Android Studio; "Theme.Examen" se llama según tu proyecto.)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Examen"
+        tools:targetApi="31">
+        <activity
+            android:name=".actividad2"
+            android:exported="false" />
+        <activity
+            android:name=".actividad1"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+
+################################################################################
+################################################################################
+ PASO 2: DESPLEGAR EL CONTENIDO DEL CARRITO CON LA OPCIÓN DEL COMBO (4 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS:      datitos.java, Adatitos.java
+  MODIFICADO:  actividad1.java
+  SIN CAMBIOS: MainActivity.java, activity_main.xml, activity_actividad1.xml,
+               actividad2.java, activity_actividad2.xml, AndroidManifest.xml
+               (quedan igual que en el PASO 1)
+
+Cómo se prueba: escribe clave y nombre, elige "carrito" en el combo (se agrega).
+Haz esto 3 veces con datos diferentes (para volver a elegir "carrito" primero
+elige otra opción, por ejemplo "selecciona opcion"). Luego elige "desplegar".
+
+--------------------------------------------------------------------------------
+ datitos.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+public class datitos {
+    int dato1;
+    String dato2;
+
+    public int getDato1() {
+        return dato1;
+    }
+
+    public void setDato1(int dato1) {
+        this.dato1 = dato1;
+    }
+
+    public String getDato2() {
+        return dato2;
+    }
+
+    public void setDato2(String dato2) {
+        this.dato2 = dato2;
+    }
+}
+
+--------------------------------------------------------------------------------
+ Adatitos.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import java.util.ArrayList;
+
+public class Adatitos {
+    ArrayList<datitos> lista = new ArrayList<>();
+
+    public void agregar(datitos objetito){
+        lista.add(objetito);
+    }
+
+    public ArrayList<datitos> regresa(){
+        return lista;
+    }
+}
+
+--------------------------------------------------------------------------------
+ actividad1.java   (MODIFICADO - completo)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+
+public class actividad1 extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+
+    EditText dato1, dato2;
+    Spinner combito;
+    Button botoncito;
+    String [] opciones = {"selecciona opcion", "carrito", "desplegar"};
+    ArrayAdapter adaptado;
+    Adatitos lista = new Adatitos();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_actividad1);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        dato1 = findViewById(R.id.texto1);
+        dato2 = findViewById(R.id.texto2);
+        botoncito = findViewById(R.id.despliega);
+
+        adaptado = new ArrayAdapter(this, android.R.layout.simple_list_item_1, opciones);
+        combito = findViewById(R.id.combito);
+        combito.setOnItemSelectedListener(this);
+        combito.setAdapter(adaptado);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View v, int i, long l) {
+        String cadenita = combito.getItemAtPosition(i).toString();
+        datitos objetito = new datitos();
+
+        if(cadenita.equals("carrito")){
+            objetito.setDato1(Integer.parseInt(dato1.getText().toString()));
+            objetito.setDato2(dato2.getText().toString());
+            lista.agregar(objetito);
+            Toast.makeText(this, "Agregado", Toast.LENGTH_SHORT).show();
+        }else if(cadenita.equals("desplegar")){
+            desplegarLista();
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    public void desplegarLista(){
+        ArrayList<datitos> regreso = lista.regresa();
+        int cuantos = regreso.size();
+        for(int i = 0; i < cuantos; i++){
+            Toast.makeText(this, "Clave: " + regreso.get(i).getDato1()
+                    + " Nombre: " + regreso.get(i).getDato2(), Toast.LENGTH_LONG).show();
+        }
+    }
+}
+
+
+################################################################################
+################################################################################
+ PASO 3: DESPLEGAR EL CONTENIDO DEL CARRITO CON EL BOTÓN DESPLEGAR (4 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  MODIFICADO:  actividad1.java
+  SIN CAMBIOS: MainActivity.java, activity_main.xml, activity_actividad1.xml,
+               actividad2.java, activity_actividad2.xml, AndroidManifest.xml,
+               datitos.java, Adatitos.java
+               (quedan igual que en los pasos anteriores)
+
+Qué cambia: actividad1 ahora también implementa View.OnClickListener, se le
+pone setOnClickListener al botón y se agrega el método onClick, que reutiliza
+desplegarLista().
+
+--------------------------------------------------------------------------------
+ actividad1.java   (MODIFICADO - completo, versión final)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+
+public class actividad1 extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+
+    EditText dato1, dato2;
+    Spinner combito;
+    Button botoncito;
+    String [] opciones = {"selecciona opcion", "carrito", "desplegar"};
+    ArrayAdapter adaptado;
+    Adatitos lista = new Adatitos();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_actividad1);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        dato1 = findViewById(R.id.texto1);
+        dato2 = findViewById(R.id.texto2);
+
+        botoncito = findViewById(R.id.despliega);
+        botoncito.setOnClickListener(this);
+
+        adaptado = new ArrayAdapter(this, android.R.layout.simple_list_item_1, opciones);
+        combito = findViewById(R.id.combito);
+        combito.setOnItemSelectedListener(this);
+        combito.setAdapter(adaptado);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View v, int i, long l) {
+        String cadenita = combito.getItemAtPosition(i).toString();
+        datitos objetito = new datitos();
+
+        if(cadenita.equals("carrito")){
+            objetito.setDato1(Integer.parseInt(dato1.getText().toString()));
+            objetito.setDato2(dato2.getText().toString());
+            lista.agregar(objetito);
+            Toast.makeText(this, "Agregado", Toast.LENGTH_SHORT).show();
+        }else if(cadenita.equals("desplegar")){
+            desplegarLista();
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("desplegar")){
+            desplegarLista();
+        }
+    }
+
+    public void desplegarLista(){
+        ArrayList<datitos> regreso = lista.regresa();
+        int cuantos = regreso.size();
+        for(int i = 0; i < cuantos; i++){
+            Toast.makeText(this, "Clave: " + regreso.get(i).getDato1()
+                    + " Nombre: " + regreso.get(i).getDato2(), Toast.LENGTH_LONG).show();
+        }
+    }
+}
+
+
+================================================================================
+ RESUMEN DE ARCHIVOS AL FINAL
+================================================================================
+ MainActivity.java         -> PASO 1 (no cambia después)
+ activity_main.xml         -> PASO 1 (no cambia después)
+ actividad1.java           -> PASO 1, cambia en PASO 2, versión final en PASO 3
+ activity_actividad1.xml   -> PASO 1 (no cambia después)
+ actividad2.java           -> PASO 1 (no cambia después)
+ activity_actividad2.xml   -> PASO 1 (no cambia después)
+ AndroidManifest.xml       -> PASO 1 (no cambia después)
+ datitos.java              -> PASO 2 (no cambia después)
+ Adatitos.java             -> PASO 2 (no cambia después)
+
+ OJO: no dejes vacío el cuadro "clave" al elegir "carrito"; si está vacío,
+ Integer.parseInt truena la app.
+================================================================================
