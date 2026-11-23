@@ -1,0 +1,781 @@
+================================================================================
+ EXAMEN: LISTVIEW (2 ELEMENTOS) + BASE DE DATOS (altas y consultas)
+         + MENÚ DE PUNTITOS CON CLASE "mensajitos"
+ Proyecto: examen
+================================================================================
+
+NOTAS ANTES DE EMPEZAR
+- Crea el proyecto en Android Studio como "Empty Views Activity" en Java,
+  con el nombre examen (así sale el título "examen" en la barra de arriba).
+- En este archivo el paquete es: com.example.examen
+  Si tu proyecto se llama distinto, cambia SOLO la primera línea "package ..."
+  de cada .java por el nombre de tu paquete.
+- IMÁGENES de la lista: copia 2 imágenes a app/src/main/res/drawable/
+  con los nombres deporte1 y deporte2 (.png o .jpg, en minúsculas, sin
+  espacios ni guiones).
+- Para crear las actividades "crudcito" y "menupuntitos": clic derecho en el
+  paquete > New > Activity > Empty Views Activity.
+- Para crear adaptador, Base y mensajitos: clic derecho en el paquete >
+  New > Java Class.
+- Para crear el menú: clic derecho en res > New > Android Resource File >
+  Resource type: Menu, nombre: menucito.
+- Archivos que NO se modifican en ningún paso: build.gradle.kts,
+  settings.gradle.kts, strings.xml, colors.xml.
+- Ubicación de cada archivo:
+    .java          -> app/src/main/java/com/example/examen/
+    layouts .xml   -> app/src/main/res/layout/
+    menucito.xml   -> app/src/main/res/menu/
+    themes.xml     -> app/src/main/res/values/
+    AndroidManifest.xml -> app/src/main/
+
+
+################################################################################
+################################################################################
+ PASO 1: LISTVIEW CON 2 ELEMENTOS (imagen + 2 textos); EL PRIMERO LLEVA A
+         "crudcito" Y EL SEGUNDO A "menupuntitos" (3 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS/MODIFICADOS: themes.xml, AndroidManifest.xml,
+                      MainActivity.java, activity_main.xml,
+                      adaptador.java, basurita.xml,
+                      crudcito.java, activity_crudcito.xml,
+                      menupuntitos.java, activity_menupuntitos.xml
+  (Base.java, mensajitos.java y menucito.xml todavía no existen)
+
+--------------------------------------------------------------------------------
+ themes.xml   (res/values/themes.xml)
+ Se borra ".NoActionBar" para que aparezca la barra de arriba con el título
+ y después el menú de puntitos. Cambia "Examen" si tu tema se llama distinto.
+--------------------------------------------------------------------------------
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Examen" parent="Theme.Material3.DayNight">
+        <!-- todo Borra lo de .NoActionBar-->
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Examen" parent="Base.Theme.Examen" />
+</resources>
+
+--------------------------------------------------------------------------------
+ AndroidManifest.xml
+ (Lo nuevo es android:label en crudcito y menupuntitos, para que en la barra
+  de arriba salga "crudcito" y "menupuntitos". El resto déjalo como te lo
+  generó Android Studio.)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Examen"
+        tools:targetApi="31">
+        <activity
+            android:name=".menupuntitos"
+            android:label="menupuntitos"
+            android:exported="false" />
+        <activity
+            android:name=".crudcito"
+            android:label="crudcito"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+--------------------------------------------------------------------------------
+ MainActivity.java
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    ListView vista;
+    String nombre [] = {"a base", "a menu"};
+    String comentarios [] = {"vale 5", "otro de 5"};
+    int imagenes [] = {R.drawable.deporte1, R.drawable.deporte2};
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        vista = findViewById(R.id.lista);
+        vista.setOnItemClickListener(this);
+        adaptador adaptador = new adaptador(getApplicationContext(),
+                comentarios, nombre, imagenes);
+        vista.setAdapter(adaptador);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+        //todo position 0 es el primer elemento, position 1 es el segundo
+        if(position == 0){
+            Intent intentito = new Intent(this, crudcito.class);
+            startActivity(intentito);
+        }else if(position == 1){
+            Intent intentito = new Intent(this, menupuntitos.class);
+            startActivity(intentito);
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_main.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/lista"></ListView>
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ adaptador.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+//todo ponle lo de extends BaseAdapter
+public class adaptador extends BaseAdapter {
+    Context contexto;
+    String comentarios [];
+    String nombre [];
+    int imagenes [];
+    LayoutInflater inflater;
+
+    //todo Constructor
+    public adaptador(Context contexto, String[] comentarios, String[] nombre,
+                     int[] imagenes) {
+        this.contexto = contexto;
+        this.comentarios = comentarios;
+        this.nombre = nombre;
+        this.imagenes = imagenes;
+        this.inflater = LayoutInflater.from(contexto);
+    }
+
+    @Override
+    public int getCount(){
+        return comentarios.length;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return null;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        convertView = inflater.inflate(R.layout.basurita, null);
+        TextView texto1 = convertView.findViewById(R.id.texto1);
+        TextView texto2 = convertView.findViewById(R.id.texto2);
+        ImageView imagen = convertView.findViewById(R.id.fotito);
+        texto1.setText(nombre[position]);
+        texto2.setText(comentarios[position]);
+        imagen.setImageResource(imagenes[position]);
+        return convertView;
+    }
+}
+
+--------------------------------------------------------------------------------
+ basurita.xml   (NUEVO - diseño de cada renglón de la lista)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/fotito"></ImageView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/texto1"
+            android:textSize="20dp"></TextView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/texto2"
+            android:textSize="20dp"></TextView>
+
+    </LinearLayout>
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ crudcito.java   (por ahora solo muestra la pantalla)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class crudcito extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_crudcito);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_crudcito.xml   (por ahora vacía)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".crudcito"
+    android:orientation="vertical">
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ menupuntitos.java   (por ahora solo muestra la pantalla)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class menupuntitos extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_menupuntitos);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_menupuntitos.xml   (por ahora vacía)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".menupuntitos"
+    android:orientation="vertical">
+
+</LinearLayout>
+
+
+################################################################################
+################################################################################
+ PASO 2: BASE DE DATOS "disquitos", TABLA "tablita" (clave, titulo, costo)
+         CON RUTINA DE ALTAS Y RUTINA DE CONSULTAS (5 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVO:       Base.java
+  MODIFICADOS: crudcito.java, activity_crudcito.xml
+  SIN CAMBIOS: themes.xml, AndroidManifest.xml, MainActivity.java,
+               activity_main.xml, adaptador.java, basurita.xml,
+               menupuntitos.java, activity_menupuntitos.xml
+               (quedan igual que en el PASO 1)
+
+Cómo funciona:
+ ALTAS:     clic en "altas" -> el botón cambia a "agregar", se inhabilita
+            "consultas" y se habilitan los 3 cuadros. Tecleas los datos y das
+            clic en "agregar" -> se guarda en tablita, el botón vuelve a
+            "altas", "consultas" se habilita, se borran los cuadros y se
+            inhabilitan.
+ CONSULTAS: clic en "consultas" -> se habilita solo el cuadro de clave, se
+            inhabilita "altas" y el botón cambia a "buscar". Tecleas la clave
+            y das clic en "buscar" -> si existe, aparecen título y costo; si
+            no, sale un mensaje de que no existe. Luego todo regresa a como
+            estaba.
+
+OJO: la clave es TEXTO, por eso en el select va entre comillas simples:
+     "... where clave='" + codigo + "'"
+
+--------------------------------------------------------------------------------
+ Base.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import androidx.annotation.Nullable;
+
+public class Base extends SQLiteOpenHelper {
+
+    public Base(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, name, factory, version);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL("create table tablita(clave text primary key, titulo text, costo int)");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_crudcito.xml   (MODIFICADO - completo)
+ (Los cuadros de texto empiezan inhabilitados: android:enabled="false")
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".crudcito"
+    android:orientation="vertical"
+    android:layout_margin="20dp">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/eclave"
+        android:inputType="text"
+        android:enabled="false" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="clave"
+        android:textAlignment="center" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/etitulo"
+        android:inputType="text"
+        android:enabled="false" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="titulo"
+        android:textAlignment="center" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ecosto"
+        android:inputType="number"
+        android:enabled="false" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="costo"
+        android:textAlignment="center" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/altas"
+        android:text="altas"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/consultas"
+        android:text="consultas" />
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ crudcito.java   (MODIFICADO - completo, versión final)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class crudcito extends AppCompatActivity implements View.OnClickListener {
+
+    EditText etclave, ettitulo, etcosto;
+    Button botonalt, botoncons;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_crudcito);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        etclave = findViewById(R.id.eclave);
+        ettitulo = findViewById(R.id.etitulo);
+        etcosto = findViewById(R.id.ecosto);
+
+        botonalt = findViewById(R.id.altas);
+        botonalt.setOnClickListener(this);
+
+        botoncons = findViewById(R.id.consultas);
+        botoncons.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("altas")){
+            ayuditaa();
+        }else if(cadenita.equals("agregar")){
+            Base admin = new Base(this, "disquitos", null, 1);
+            SQLiteDatabase basesita = admin.getWritableDatabase();
+            String llave = etclave.getText().toString();
+            String nombre = ettitulo.getText().toString();
+            int precio = Integer.parseInt(etcosto.getText().toString());
+            ContentValues registro = new ContentValues();
+            registro.put("clave", llave);
+            registro.put("titulo", nombre);
+            registro.put("costo", precio);
+            basesita.insert("tablita", null, registro);
+            basesita.close();
+            ayuditaab();
+        }else if(cadenita.equals("consultas")){
+            ayuditac();
+        }else if(cadenita.equals("buscar")){
+            Base admin = new Base(this, "disquitos", null, 1);
+            SQLiteDatabase basesita = admin.getReadableDatabase();
+            String codigo = etclave.getText().toString();
+            //todo la clave es texto, por eso va entre comillas simples
+            Cursor fila = basesita.rawQuery("select titulo, costo from tablita where clave='" + codigo + "'", null);
+            if(fila.moveToFirst()){
+                ettitulo.setText(fila.getString(0));
+                etcosto.setText(fila.getString(1));
+            }else{
+                Toast.makeText(this, "No existe el registro", Toast.LENGTH_SHORT).show();
+            }
+            fila.close();
+            basesita.close();
+            ayuditacab();
+        }
+    }
+
+    //todo rutina de altas: al dar clic en "altas"
+    private void ayuditaa(){
+        etclave.setEnabled(true);
+        ettitulo.setEnabled(true);
+        etcosto.setEnabled(true);
+        botoncons.setEnabled(false);
+        botonalt.setText("agregar");
+    }
+
+    //todo rutina de altas: después de "agregar"
+    private void ayuditaab(){
+        etclave.setText("");
+        ettitulo.setText("");
+        etcosto.setText("");
+        etclave.setEnabled(false);
+        ettitulo.setEnabled(false);
+        etcosto.setEnabled(false);
+        botoncons.setEnabled(true);
+        botonalt.setText("altas");
+        Toast.makeText(this, "Agregado", Toast.LENGTH_SHORT).show();
+    }
+
+    //todo rutina de consultas: al dar clic en "consultas"
+    private void ayuditac(){
+        etclave.setEnabled(true);
+        ettitulo.setEnabled(false);
+        etcosto.setEnabled(false);
+        botonalt.setEnabled(false);
+        botoncons.setText("buscar");
+    }
+
+    //todo rutina de consultas: después de "buscar"
+    private void ayuditacab(){
+        etclave.setEnabled(false);
+        ettitulo.setEnabled(false);
+        etcosto.setEnabled(false);
+        botonalt.setEnabled(true);
+        botoncons.setText("consultas");
+    }
+}
+
+
+################################################################################
+################################################################################
+ PASO 3: MENÚ DE PUNTITOS CON "saludo" Y "otro saludo" (mensajes en la clase
+         "mensajitos") Y BOTÓN "regreso" A LA ACTIVIDAD PRINCIPAL (2 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS:      mensajitos.java, menucito.xml
+  MODIFICADOS: menupuntitos.java, activity_menupuntitos.xml
+  SIN CAMBIOS: themes.xml, AndroidManifest.xml, MainActivity.java,
+               activity_main.xml, adaptador.java, basurita.xml,
+               Base.java, crudcito.java, activity_crudcito.xml
+               (quedan igual que en los pasos anteriores)
+
+--------------------------------------------------------------------------------
+ mensajitos.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+public class mensajitos {
+
+    public String saludo(){
+        return "hola que tal";
+    }
+
+    public String otrosaludo(){
+        return "hola nuevamente";
+    }
+}
+
+--------------------------------------------------------------------------------
+ menucito.xml   (NUEVO - res/menu/menucito.xml)
+ (Las dos opciones van en los 3 puntitos: showAsAction="never".
+  En la imagen del examen también se ve un iconito junto a los puntitos; si
+  lo quieres, agrega otro <item> con android:icon y app:showAsAction="always",
+  como en tu proyecto MenuPuntitos.)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- todo Esto es para el kebab (los 3 puntitos) -->
+    <item
+        android:id="@+id/saludo"
+        android:title="saludo"
+        app:showAsAction="never"></item>
+
+    <item
+        android:id="@+id/otrosaludo"
+        android:title="otro saludo"
+        app:showAsAction="never"></item>
+
+</menu>
+
+--------------------------------------------------------------------------------
+ activity_menupuntitos.xml   (MODIFICADO - completo)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".menupuntitos"
+    android:orientation="vertical">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/regreso"
+        android:text="regreso"
+        android:layout_marginTop="40dp" />
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ menupuntitos.java   (MODIFICADO - completo, versión final)
+--------------------------------------------------------------------------------
+package com.example.examen;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class menupuntitos extends AppCompatActivity implements View.OnClickListener {
+
+    Button regresob;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_menupuntitos);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        regresob = findViewById(R.id.regreso);
+        regresob.setOnClickListener(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menucito, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        mensajitos objetito = new mensajitos();
+
+        if(item.getItemId() == R.id.saludo){
+            Toast.makeText(this, objetito.saludo(), Toast.LENGTH_SHORT).show();
+        }else if(item.getItemId() == R.id.otrosaludo){
+            Toast.makeText(this, objetito.otrosaludo(), Toast.LENGTH_SHORT).show();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("regreso")){
+            Intent intentito = new Intent(this, MainActivity.class);
+            startActivity(intentito);
+        }
+    }
+}
+
+
+================================================================================
+ RESUMEN DE ARCHIVOS AL FINAL
+================================================================================
+ themes.xml                 -> PASO 1 (no cambia después)
+ AndroidManifest.xml        -> PASO 1 (no cambia después)
+ MainActivity.java          -> PASO 1 (no cambia después)
+ activity_main.xml          -> PASO 1 (no cambia después)
+ adaptador.java             -> PASO 1 (no cambia después)
+ basurita.xml               -> PASO 1 (no cambia después)
+ crudcito.java              -> PASO 1, versión final en PASO 2
+ activity_crudcito.xml      -> PASO 1, versión final en PASO 2
+ Base.java                  -> PASO 2 (no cambia después)
+ menupuntitos.java          -> PASO 1, versión final en PASO 3
+ activity_menupuntitos.xml  -> PASO 1, versión final en PASO 3
+ mensajitos.java            -> PASO 3 (no cambia después)
+ menucito.xml               -> PASO 3 (no cambia después)
+ imágenes deporte1/2        -> las pones tú en res/drawable
+
+ OJO:
+ - No dejes vacío "costo" al dar "agregar"; Integer.parseInt truena la app.
+ - Si das de alta la misma clave dos veces, la segunda no se guarda
+   (es primary key).
+ - Si cambias algo de la tabla en Base.java después de haber corrido la app,
+   desinstala la app del emulador para que se vuelva a crear la base.
+================================================================================
