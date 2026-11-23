@@ -1,0 +1,508 @@
+================================================================================
+ EXAMEN: ARREGLOS EN "Clasesita" -> ARRAYLIST -> BASE DE DATOS "administra"
+         (tabla "chalancitos") -> DESPLEGAR EN UN TABLELAYOUT
+         + SEGUNDO DESPLEGADO ORDENADO CON LA SUMA DE LOS SUELDOS
+================================================================================
+
+NOTAS ANTES DE EMPEZAR
+- Crea el proyecto en Android Studio como "Empty Views Activity" en Java.
+- En este archivo el paquete es: com.example.chalancitos
+  Si tu proyecto se llama distinto, cambia SOLO la primera línea "package ..."
+  de cada .java por el nombre de tu paquete.
+- Para crear Clasesita, chalancito y Base: clic derecho en el paquete >
+  New > Java Class.
+- Archivos que NO se modifican en ningún paso: AndroidManifest.xml,
+  build.gradle.kts, settings.gradle.kts, strings.xml, colors.xml, themes.xml.
+- Ubicación de cada archivo:
+    .java          -> app/src/main/java/com/example/chalancitos/
+    activity_main.xml -> app/src/main/res/layout/
+
+Cómo está armado:
+ - Clasesita: tiene los 4 arreglos del examen y el método regresa(), que los
+   pasa a un ArrayList de objetos "chalancito" y lo retorna.
+ - chalancito: un objeto por empleado (clave, puesto, depto, sueldo) con sus
+   getters y setters.
+ - Base: crea la tabla chalancitos en la base de datos administra.
+ - MainActivity: al abrir la app guarda el ArrayList en la tabla; el botón
+   "desplegar" lee la tabla y llena el TableLayout.
+
+
+################################################################################
+################################################################################
+ PASO 1: PASAR LOS ARREGLOS A UN ARRAYLIST, GUARDARLOS EN LA TABLA
+         "chalancitos" DE LA BASE "administra" Y DESPLEGARLOS EN UN
+         TABLELAYOUT COMO EN LA FIGURA 1 (5 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  NUEVOS:      Clasesita.java, chalancito.java, Base.java
+  MODIFICADOS: MainActivity.java, activity_main.xml
+
+--------------------------------------------------------------------------------
+ chalancito.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.chalancitos;
+
+public class chalancito {
+    int clave;
+    String puesto;
+    String depto;
+    int sueldo;
+
+    public int getClave() {
+        return clave;
+    }
+
+    public void setClave(int clave) {
+        this.clave = clave;
+    }
+
+    public String getPuesto() {
+        return puesto;
+    }
+
+    public void setPuesto(String puesto) {
+        this.puesto = puesto;
+    }
+
+    public String getDepto() {
+        return depto;
+    }
+
+    public void setDepto(String depto) {
+        this.depto = depto;
+    }
+
+    public int getSueldo() {
+        return sueldo;
+    }
+
+    public void setSueldo(int sueldo) {
+        this.sueldo = sueldo;
+    }
+}
+
+--------------------------------------------------------------------------------
+ Clasesita.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.chalancitos;
+
+import java.util.ArrayList;
+
+public class Clasesita {
+
+    int clave[] = {1,2,3,4,5,6,7,8,9,10};
+
+    String puesto[] = {"secretaria", "director", "programador", "capturista", "tester",
+            "carpintero", "electricista", "albañil", "azulejos", "pintor"};
+
+    String depto[] = {"programacion","programacion","programacion","programacion","programacion",
+            "conservacion","conservacion","conservacion","conservacion","conservacion"};
+
+    int sueldo[] = {10000,50000,30000,12000,15000,5000,5000,5000,5000,5000};
+
+    //todo pasa los arreglos a un ArrayList y lo retorna a la clase principal
+    public ArrayList<chalancito> regresa(){
+        ArrayList<chalancito> lista = new ArrayList<>();
+        for(int i = 0; i < clave.length; i++){
+            chalancito objetito = new chalancito();
+            objetito.setClave(clave[i]);
+            objetito.setPuesto(puesto[i]);
+            objetito.setDepto(depto[i]);
+            objetito.setSueldo(sueldo[i]);
+            lista.add(objetito);
+        }
+        return lista;
+    }
+}
+
+--------------------------------------------------------------------------------
+ Base.java   (NUEVO)
+--------------------------------------------------------------------------------
+package com.example.chalancitos;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import androidx.annotation.Nullable;
+
+public class Base extends SQLiteOpenHelper {
+
+    public Base(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, name, factory, version);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL("create table chalancitos(clave int primary key, puesto text, depto text, sueldo int)");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+    }
+}
+
+--------------------------------------------------------------------------------
+ activity_main.xml   (MODIFICADO - completo, no cambia en el PASO 2)
+ (El primer TableRow es el encabezado; los renglones de datos se agregan
+  desde Java. El ScrollView es por si los datos no caben en la pantalla.)
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/despliega"
+        android:text="desplegar"
+        android:layout_margin="10dp"></Button>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tablita"
+            android:stretchColumns="*">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#555555">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clave"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:padding="5dp"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Puesto"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:padding="5dp"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Depto"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:padding="5dp"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sueldo"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:padding="5dp"></TextView>
+
+            </TableRow>
+
+        </TableLayout>
+    </ScrollView>
+
+</LinearLayout>
+
+--------------------------------------------------------------------------------
+ MainActivity.java   (MODIFICADO - completo)
+--------------------------------------------------------------------------------
+package com.example.chalancitos;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    Button desplegarb;
+    TableLayout tablita;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        desplegarb = findViewById(R.id.despliega);
+        desplegarb.setOnClickListener(this);
+
+        tablita = findViewById(R.id.tablita);
+
+        guardar();
+    }
+
+    //todo pide el ArrayList a Clasesita y lo guarda en la tabla chalancitos
+    private void guardar(){
+        Clasesita objetito = new Clasesita();
+        ArrayList<chalancito> regreso = objetito.regresa();
+
+        Base admin = new Base(this, "administra", null, 1);
+        SQLiteDatabase basesita = admin.getWritableDatabase();
+
+        //todo se borra lo que habia para que no se repitan las claves cada vez que abres la app
+        basesita.delete("chalancitos", null, null);
+
+        int cuantos = regreso.size();
+        for(int i = 0; i < cuantos; i++){
+            ContentValues registro = new ContentValues();
+            registro.put("clave", regreso.get(i).getClave());
+            registro.put("puesto", regreso.get(i).getPuesto());
+            registro.put("depto", regreso.get(i).getDepto());
+            registro.put("sueldo", regreso.get(i).getSueldo());
+            basesita.insert("chalancitos", null, registro);
+        }
+        basesita.close();
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("desplegar")){
+            desplegar("select clave, puesto, depto, sueldo from chalancitos order by clave");
+        }
+    }
+
+    //todo lee la tabla y agrega un TableRow por cada registro
+    private void desplegar(String consulta){
+        //todo borra los renglones anteriores pero deja el encabezado (el renglon 0)
+        if(tablita.getChildCount() > 1){
+            tablita.removeViews(1, tablita.getChildCount() - 1);
+        }
+
+        Base admin = new Base(this, "administra", null, 1);
+        SQLiteDatabase basesita = admin.getReadableDatabase();
+        Cursor fila = basesita.rawQuery(consulta, null);
+
+        while(fila.moveToNext()){
+            TableRow renglon = new TableRow(this);
+            renglon.addView(celdita(fila.getString(0)));
+            renglon.addView(celdita(fila.getString(1)));
+            renglon.addView(celdita(fila.getString(2)));
+            renglon.addView(celdita(fila.getString(3)));
+            tablita.addView(renglon);
+        }
+        fila.close();
+        basesita.close();
+    }
+
+    //todo crea cada cuadrito (TextView) del renglon
+    private TextView celdita(String texto){
+        TextView cuadrito = new TextView(this);
+        cuadrito.setText(texto);
+        cuadrito.setPadding(10, 5, 10, 5);
+        return cuadrito;
+    }
+}
+
+
+################################################################################
+################################################################################
+ PASO 2: SEGUNDO DESPLEGADO DE LOS DATOS CON LA SUMA DE TODOS LOS SUELDOS
+         (5 puntos)
+################################################################################
+################################################################################
+
+Archivos de este paso:
+  MODIFICADO:  MainActivity.java
+  SIN CAMBIOS: Clasesita.java, chalancito.java, Base.java, activity_main.xml
+               (quedan igual que en el PASO 1)
+
+Cómo funciona:
+ En las dos figuras el único botón es "desplegar", así que el botón alterna:
+   - 1er clic: primer desplegado (por clave, como la figura 1).
+   - 2do clic: segundo desplegado, ordenado por depto y luego por puesto
+     (conservacion primero, como en la figura 2), y al final un renglón
+     con la suma de los sueldos (142000).
+   - 3er clic: otra vez el primero, y así.
+ Para eso se usa la variable boolean "primero".
+ La suma se va calculando dentro del while con: suma = suma + fila.getInt(3);
+
+ Si tu profe prefiere un segundo botón, agrega en activity_main.xml otro
+ Button con android:text="sumita" y en onClick un else if que llame a
+ desplegar("... order by depto, puesto", true).
+
+--------------------------------------------------------------------------------
+ MainActivity.java   (MODIFICADO - completo, versión final)
+--------------------------------------------------------------------------------
+package com.example.chalancitos;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    Button desplegarb;
+    TableLayout tablita;
+    boolean primero = true;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        desplegarb = findViewById(R.id.despliega);
+        desplegarb.setOnClickListener(this);
+
+        tablita = findViewById(R.id.tablita);
+
+        guardar();
+    }
+
+    //todo pide el ArrayList a Clasesita y lo guarda en la tabla chalancitos
+    private void guardar(){
+        Clasesita objetito = new Clasesita();
+        ArrayList<chalancito> regreso = objetito.regresa();
+
+        Base admin = new Base(this, "administra", null, 1);
+        SQLiteDatabase basesita = admin.getWritableDatabase();
+
+        //todo se borra lo que habia para que no se repitan las claves cada vez que abres la app
+        basesita.delete("chalancitos", null, null);
+
+        int cuantos = regreso.size();
+        for(int i = 0; i < cuantos; i++){
+            ContentValues registro = new ContentValues();
+            registro.put("clave", regreso.get(i).getClave());
+            registro.put("puesto", regreso.get(i).getPuesto());
+            registro.put("depto", regreso.get(i).getDepto());
+            registro.put("sueldo", regreso.get(i).getSueldo());
+            basesita.insert("chalancitos", null, registro);
+        }
+        basesita.close();
+    }
+
+    @Override
+    public void onClick(View v) {
+        String cadenita = ((Button)v).getText().toString();
+
+        if(cadenita.equals("desplegar")){
+            if(primero){
+                //todo primer desplegado (figura 1)
+                desplegar("select clave, puesto, depto, sueldo from chalancitos order by clave", false);
+                primero = false;
+            }else{
+                //todo segundo desplegado (figura 2) con la suma de los sueldos
+                desplegar("select clave, puesto, depto, sueldo from chalancitos order by depto, puesto", true);
+                primero = true;
+            }
+        }
+    }
+
+    //todo lee la tabla y agrega un TableRow por cada registro;
+    //todo si conSuma es true, al final agrega un renglon con la suma de los sueldos
+    private void desplegar(String consulta, boolean conSuma){
+        //todo borra los renglones anteriores pero deja el encabezado (el renglon 0)
+        if(tablita.getChildCount() > 1){
+            tablita.removeViews(1, tablita.getChildCount() - 1);
+        }
+
+        Base admin = new Base(this, "administra", null, 1);
+        SQLiteDatabase basesita = admin.getReadableDatabase();
+        Cursor fila = basesita.rawQuery(consulta, null);
+        int suma = 0;
+
+        while(fila.moveToNext()){
+            TableRow renglon = new TableRow(this);
+            renglon.addView(celdita(fila.getString(0)));
+            renglon.addView(celdita(fila.getString(1)));
+            renglon.addView(celdita(fila.getString(2)));
+            renglon.addView(celdita(fila.getString(3)));
+            tablita.addView(renglon);
+            suma = suma + fila.getInt(3);
+        }
+        fila.close();
+        basesita.close();
+
+        if(conSuma){
+            TableRow renglon = new TableRow(this);
+            renglon.addView(celdita(""));
+            renglon.addView(celdita(""));
+            renglon.addView(celdita(""));
+            renglon.addView(celdita("" + suma));
+            tablita.addView(renglon);
+        }
+    }
+
+    //todo crea cada cuadrito (TextView) del renglon
+    private TextView celdita(String texto){
+        TextView cuadrito = new TextView(this);
+        cuadrito.setText(texto);
+        cuadrito.setPadding(10, 5, 10, 5);
+        return cuadrito;
+    }
+}
+
+
+================================================================================
+ RESUMEN DE ARCHIVOS AL FINAL
+================================================================================
+ chalancito.java       -> PASO 1 (no cambia después)
+ Clasesita.java        -> PASO 1 (no cambia después)
+ Base.java             -> PASO 1 (no cambia después)
+ activity_main.xml     -> PASO 1 (no cambia después)
+ MainActivity.java     -> PASO 1, versión final en PASO 2
+
+ OJO:
+ - La suma de los sueldos da 142000 (como en la figura 2).
+ - Si cambias algo de la tabla en Base.java después de haber corrido la app,
+   desinstala la app del emulador para que se vuelva a crear la base.
+================================================================================
